@@ -1,6 +1,10 @@
 # -*- coding: utf8 -*-
 
 import time
+import codecs
+
+print "*** Parsing to HTML ***"
+
 start_time = time.time()
 
 # get the parser
@@ -48,14 +52,13 @@ from html import make_parser
 parser = make_parser(allowed_tags, allowed_autoclose_tags, allowed_parameters, interwiki, namespaces)
 
 # import the source in a utf-8 string
-import codecs
 fileObj = codecs.open("wikitext.txt", "r", "utf-8")
 source = fileObj.read()
 
 # The last line of the file will not be parsed correctly if
 # there is no newline at the end of file, so, we add one.
 if source[-1] != '\n':
-  source += '\n'
+    source += '\n'
 
 preprocessed_text = preprocessor.parse(source)
 tree = parser.parse(preprocessed_text.leaves())
@@ -65,6 +68,32 @@ output = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org
 <head><title>Test!</title></head>""" + tree.leaves() + "</html>"
 
 file("article.htm", "w").write(output.encode('UTF-8'))
+
+end_time = time.time()
+print "Parsed and rendered in", end_time - start_time, "s."
+
+print "*** Parsing to text ***"
+
+start_time = time.time()
+
+from text import make_parser
+parser = make_parser(interwiki, namespaces)
+
+# import the source in a utf-8 string
+fileObj = codecs.open("wikitext.txt", "r", "utf-8")
+source = fileObj.read()
+
+# The last line of the file will not be parsed correctly if
+# there is no newline at the end of file, so, we add one.
+if source[-1] != '\n':
+    source += '\n'
+
+preprocessed_text = preprocessor.parse(source)
+tree = parser.parse(preprocessed_text.leaves())
+
+output = tree.leaves()
+
+file("article.txt", "w").write(output.encode('UTF-8'))
 
 end_time = time.time()
 print "Parsed and rendered in", end_time - start_time, "s."

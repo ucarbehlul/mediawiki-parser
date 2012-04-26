@@ -108,6 +108,17 @@ If you just want to replace the templates in a given wikitext, you can just call
 The `output` string will contain the rendered wikitext.
 Put the templates names and content in the `templates` dict (e.g.: `{'my template': 'my template content'}`)
 
+Postprocessors
+--------------
+
+The parser produces an AST. In order to provide human readable output, three postprocessors are provided:
+ * html.py, for HTML output
+ * text.py, for text output
+ * raw.py, for raw output
+
+For now, we mainly focused on HTML postprocessor. The text output might not be as cleaned as expected.
+
+You can adapt them according to your needs.
 
 Known bugs
 ==========
