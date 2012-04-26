@@ -145,8 +145,8 @@ class HTMLBackendTests(PostprocessorTestCase):
 <hr />
 <dl>
 \t<dd><dl>
-\t<dd><dl>
-\t<dd> lists</dd>
+\t\t<dd><dl>
+\t\t\t<dd> lists</dd>
 </dl>
 </dd>
 </dl>
@@ -355,11 +355,11 @@ lo'''
 """
         result = """<ul>
 \t<li> item 1<ul>
-\t<li> item 2<ul>
-\t<li> item 3</li>
+\t\t<li> item 2<ul>
+\t\t\t<li> item 3</li>
 </ul>
 </li>
-\t<li> item 2</li>
+\t\t<li> item 2</li>
 </ul>
 </li>
 </ul>
@@ -374,23 +374,23 @@ lo'''
 """
         result = """<ol>
 \t<li><ol>
-\t<li> item 2</li>
+\t\t<li> item 2</li>
 </ol>
 </li>
 \t<li><ol>
-\t<li><ol>
-\t<li> item 3</li>
+\t\t<li><ol>
+\t\t\t<li> item 3</li>
 </ol>
 </li>
 </ol>
 </li>
 \t<li><ol>
-\t<li> item 2</li>
+\t\t<li> item 2</li>
 </ol>
 </li>
 \t<li><ol>
-\t<li><ol>
-\t<li> item 3</li>
+\t\t<li><ol>
+\t\t\t<li> item 3</li>
 </ol>
 </li>
 </ol>
@@ -409,14 +409,14 @@ lo'''
 """
         result = """<dl>
 \t<dt> item 1<dl>
-\t<dt> item 2</dt>
-\t<dt> item 2</dt>
+\t\t<dt> item 2</dt>
+\t\t<dt> item 2</dt>
 </dl>
 </dt>
 \t<dt> item 1</dt>
 \t<dt> item 1<dl>
-\t<dt><dl>
-\t<dt> item 3</dt>
+\t\t<dt><dl>
+\t\t\t<dt> item 3</dt>
 </dl>
 </dt>
 </dl>
@@ -435,16 +435,16 @@ lo'''
 """
         result = """<dl>
 \t<dd> item 1<dl>
-\t<dd><dl>
-\t<dd> item 3</dd>
+\t\t<dd><dl>
+\t\t\t<dd> item 3</dd>
 </dl>
 </dd>
-\t<dd> item 2</dd>
+\t\t<dd> item 2</dd>
 </dl>
 </dd>
 \t<dd> item 1<dl>
-\t<dd> item 2</dd>
-\t<dd> item 2</dd>
+\t\t<dd> item 2</dd>
+\t\t<dd> item 2</dd>
 </dl>
 </dd>
 </dl>
@@ -462,10 +462,10 @@ lo'''
 \t<dd> item 1</dd>
 </dl>
 <dl>
-\t<dt>this is <em>italic</em></dt>
+\t<dt> this is <em>italic</em></dt>
 </dl>
 <ul>
-\t<li>and <strong>bold</strong> here</li>
+\t<li> and <strong>bold</strong> here</li>
 </ul>
 <ol>
 \t<li> a <a href="link">link</a></li>
@@ -495,35 +495,35 @@ lo'''
         result = """<ul>
 \t<li>level 1</li>
 \t<li>level 1<ul>
-\t<li>level 2<ol>
-\t<li>level 3</li>
+\t\t<li>level 2<ol>
+\t\t\t<li>level 3</li>
 </ol>
 </li>
-\t<li>level 2</li>
+\t\t<li>level 2</li>
 </ul>
 </li>
 \t<li><dl>
-\t<dd> level 2</dd>
+\t\t<dd> level 2</dd>
 </dl>
 </li>
 </ul>
 <dl>
 \t<dt> level 1</dt>
 \t<dt><ol>
-\t<li>level 2</li>
+\t\t<li>level 2</li>
 </ol>
 </dt>
 \t<dt><ol>
-\t<li><dl>
-\t<dt>level 3</dt>
+\t\t<li><dl>
+\t\t\t<dt>level 3</dt>
 </dl>
 </li>
 </ol>
 </dt>
 \t<dt><ol>
-\t<li><ol>
-\t<li><ol>
-\t<li>level 4</li>
+\t\t<li><ol>
+\t\t\t<li><ol>
+\t\t\t\t<li>level 4</li>
 </ol>
 </li>
 </ol>
@@ -531,9 +531,9 @@ lo'''
 </ol>
 </dt>
 \t<dt><ul>
-\t<li><ul>
-\t<li><ol>
-\t<li>level 4</li>
+\t\t<li><ul>
+\t\t\t<li><ol>
+\t\t\t\t<li>level 4</li>
 </ol>
 </li>
 </ul>
@@ -541,11 +541,11 @@ lo'''
 </ul>
 </dt>
 \t<dt><ul>
-\t<li><dl>
-\t<dt><ol>
-\t<li><ul>
-\t<li><dl>
-\t<dd> weird syntax</dd>
+\t\t<li><dl>
+\t\t\t<dt><ol>
+\t\t\t\t<li><ul>
+\t\t\t\t\t<li><dl>
+\t\t\t\t\t\t<dd> weird syntax</dd>
 </dl>
 </li>
 </ul>

@@ -242,31 +242,35 @@ def toolset(allowed_tags, allowed_autoclose_tags, allowed_attributes, interwiki,
     def render_hr(node):
         node.value = '<hr />\n'
 
-    def render_ul(list):
+    def render_ul(list, level):
+        indent = level * '\t'
         result = '<ul>\n'
         for i in range(len(list)):
-            result += '\t<li>' + content(list[i]) +  '</li>\n'
+            result += indent + '<li>' + content(list[i]) +  '</li>\n'
         result += '</ul>\n'
         return result
 
-    def render_ol(list):
+    def render_ol(list, level):
+        indent = level * '\t'
         result = '<ol>\n'
         for i in range(len(list)):
-            result += '\t<li>' + content(list[i]) +  '</li>\n'
+            result += indent + '<li>' + content(list[i]) +  '</li>\n'
         result += '</ol>\n'
         return result
 
-    def render_dd(list):
+    def render_dd(list, level):
+        indent = level * '\t'
         result = '<dl>\n'
         for i in range(len(list)):
-            result += '\t<dd>' + content(list[i]) +  '</dd>\n'
+            result += indent + '<dd>' + content(list[i]) +  '</dd>\n'
         result += '</dl>\n'
         return result
 
-    def render_dt(list):
+    def render_dt(list, level):
+        indent = level * '\t'
         result = '<dl>\n'
         for i in range(len(list)):
-            result += '\t<dt>' + content(list[i]) +  '</dt>\n'
+            result += indent + '<dt>' + content(list[i]) +  '</dt>\n'
         result += '</dl>\n'
         return result
 
@@ -285,35 +289,35 @@ def toolset(allowed_tags, allowed_autoclose_tags, allowed_attributes, interwiki,
             if isinstance(list[i].value, Nodes):
                 collapse_list(list[i].value)
 
-    def select_items(nodes, i, value):
+    def select_items(nodes, i, value, level):
         list_tags = ['bullet_list_leaf', 'number_list_leaf', 'colon_list_leaf', 'semi_colon_list_leaf']
         list_tags.remove(value)
         if isinstance(nodes[i].value, Nodes):
-            render_lists(nodes[i].value)
+            render_lists(nodes[i].value, level + 1)
         items = [nodes[i]]
         while i + 1 < len(nodes) and nodes[i+1].tag not in list_tags:
             if isinstance(nodes[i+1].value, Nodes):
-                render_lists(nodes[i+1].value)
+                render_lists(nodes[i+1].value, level + 1)
             items.append(nodes.pop(i+1))
         return items
 
-    def render_lists(list):
+    def render_lists(list, level):
         i = 0
         while i < len(list):
             if list[i].tag == 'bullet_list_leaf' or list[i].tag == '@bullet_sub_list@':
-                list[i].value = render_ul(select_items(list, i, 'bullet_list_leaf'))
+                list[i].value = render_ul(select_items(list, i, 'bullet_list_leaf', level), level)
             elif list[i].tag == 'number_list_leaf' or list[i].tag == '@number_sub_list@':
-                list[i].value = render_ol(select_items(list, i, 'number_list_leaf'))
+                list[i].value = render_ol(select_items(list, i, 'number_list_leaf', level), level)
             elif list[i].tag == 'colon_list_leaf' or list[i].tag == '@colon_sub_list@':
-                list[i].value = render_dd(select_items(list, i, 'colon_list_leaf'))
+                list[i].value = render_dd(select_items(list, i, 'colon_list_leaf', level), level)
             elif list[i].tag == 'semi_colon_list_leaf' or list[i].tag == '@semi_colon_sub_list@':
-                list[i].value = render_dt(select_items(list, i, 'semi_colon_list_leaf'))
+                list[i].value = render_dt(select_items(list, i, 'semi_colon_list_leaf', level), level)
             i += 1
 
     def render_list(node):
         assert isinstance(node.value, Nodes), "Bad AST shape!"
         collapse_list(node.value)
-        render_lists(node.value)
+        render_lists(node.value, 1)
 
     def render_url(node):
         node.value = '<a href="%s">%s</a>' % (node.leaf(), node.leaf())

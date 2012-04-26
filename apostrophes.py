@@ -28,7 +28,7 @@ default_tags = {'bold': '<strong>',
 
 
 def parse_one_line(text, tags=default_tags):
-        arr = _quotePat.split(text.strip())
+        arr = _quotePat.split(text)
         if len(arr) == 1:
             return text
 

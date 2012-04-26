@@ -169,3 +169,176 @@ et l'''italique''...
         result = "Here, we have *text* and _more text_ and _*still more text*_.\n"
         templates = {'template': "'''text''' and ''more text'' and '''''still more text'''''"}
         self.parsed_equal_string(source, result, None, templates, 'text')
+
+    def test_simple_bullet_list(self):
+        source = """* item 1
+** item 2
+*** item 3
+** item 2
+"""
+        result = """
+\t*  item 1
+\t\t*  item 2
+\t\t\t*  item 3
+
+\t\t*  item 2
+
+"""
+        self.parsed_equal_string(source, result, 'wikitext', {}, 'text')
+
+    def test_simple_numbered_list(self):
+        source = """## item 2
+### item 3
+## item 2
+### item 3
+"""
+        result = """
+\t1. 
+\t\t1.  item 2
+
+\t2. 
+\t\t1. 
+\t\t\t1.  item 3
+
+
+\t3. 
+\t\t1.  item 2
+
+\t4. 
+\t\t1. 
+\t\t\t1.  item 3
+
+
+"""
+        self.parsed_equal_string(source, result, 'wikitext', {}, 'text')
+
+    def test_simple_semicolon_list(self):
+        source = """; item 1
+;; item 2
+;; item 2
+; item 1
+; item 1
+;;; item 3
+"""
+        result = """
+\t*  item 1
+\t\t*  item 2
+\t\t*  item 2
+
+\t*  item 1
+\t*  item 1
+\t\t* 
+\t\t\t*  item 3
+
+
+"""
+        self.parsed_equal_string(source, result, 'wikitext', {}, 'text')
+
+    def test_simple_colon_list(self):
+        source = """: item 1
+::: item 3
+:: item 2
+: item 1
+:: item 2
+:: item 2
+"""
+        result = """
+\t*  item 1
+\t\t* 
+\t\t\t*  item 3
+
+\t\t*  item 2
+
+\t*  item 1
+\t\t*  item 2
+\t\t*  item 2
+
+"""
+        self.parsed_equal_string(source, result, 'wikitext', {}, 'text')
+
+    def test_formatted_mixed_list(self):
+        source = """: item 1
+; this is ''italic''
+* and '''bold''' here
+# a [[link]]
+: a {{template}}
+"""
+        result = """
+\t*  item 1
+
+\t*  this is _italic_
+
+\t*  and *bold* here
+
+\t1.  a link (link: link)
+
+\t*  a template!
+"""
+        templates = {'template': 'template!'}
+        self.parsed_equal_string(source, result, 'wikitext', templates, 'text')
+
+    def test_complex_mixed_list(self):
+        source = """*level 1
+*level 1
+**level 2
+**#level 3
+**level 2
+:: level 2
+; level 1
+##level 2
+##;level 3
+####level 4
+#**#level 4
+:*;#*: weird syntax
+* end
+"""
+        result = """
+\t* level 1
+\t* level 1
+\t\t* level 2
+\t\t\t1. level 3
+
+\t\t* level 2
+
+\t* 
+\t\t*  level 2
+
+
+\t*  level 1
+\t* 
+\t\t1. level 2
+
+\t* 
+\t\t1. 
+\t\t\t* level 3
+
+
+\t* 
+\t\t1. 
+\t\t\t1. 
+\t\t\t\t1. level 4
+
+
+
+\t* 
+\t\t* 
+\t\t\t* 
+\t\t\t\t1. level 4
+
+
+
+\t* 
+\t\t* 
+\t\t\t* 
+\t\t\t\t1. 
+\t\t\t\t\t* 
+\t\t\t\t\t\t*  weird syntax
+
+
+
+
+
+
+\t*  end
+"""
+        self.parsed_equal_string(source, result, 'wikitext', {}, 'text')
