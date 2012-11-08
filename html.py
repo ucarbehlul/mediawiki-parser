@@ -105,12 +105,18 @@ def toolset(allowed_tags, allowed_autoclose_tags, allowed_attributes, interwiki,
         node.value = '&gt;'
 
     def process_attribute(node, allowed_tag):
-        assert len(node.value) == 2, "Bad AST shape!"
-        attribute_name = node.value[0].value
-        attribute_value = node.value[1].value
-        if attribute_name in allowed_attributes or not allowed_tag:
-            return '%s="%s"' % (attribute_name, attribute_value)
-        return ''
+        assert len(node.value) in [1,2], "Bad AST shape!"
+        if len(node.value) == 1:
+            attribute_name = node.value[0].value
+            if attribute_name in allowed_attributes or not allowed_tag:
+                return '%s' % attribute_name
+            return ''
+        elif len(node.value) == 2:
+            attribute_name = node.value[0].value
+            attribute_value = node.value[1].value
+            if attribute_name in allowed_attributes or not allowed_tag:
+                return '%s="%s"' % (attribute_name, attribute_value)
+            return ''
 
     def process_attributes(node, allowed_tag):
         result = ''

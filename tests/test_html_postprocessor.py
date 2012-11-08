@@ -51,6 +51,11 @@ class HTMLBackendTests(PostprocessorTestCase):
         result = 'a&lt;test /&gt;test'
         self.parsed_equal_string(source, result, 'inline', {}, 'html')
 
+    def test_simple_disallowed_standalone_attribute(self):
+        source = 'a<test foobar>test'
+        result = 'a&lt;test foobar&gt;test'
+        self.parsed_equal_string(source, result, 'inline', {}, 'html')
+
     def test_complex_disallowed_autoclose_tag(self):
         source = '<img src="file.png" />'
         result = '&lt;img src="file.png" /&gt;'

@@ -100,6 +100,11 @@ class TextBackendTests(PostprocessorTestCase):
         result = '<test />'
         self.parsed_equal_string(source, result, 'inline', {}, 'text')
 
+    def test_simple_disallowed_standalone_attribute(self):
+        source = 'a <test test> test'
+        result = 'a <test test> test'
+        self.parsed_equal_string(source, result, 'inline', {}, 'text')
+
     def test_complex_disallowed_autoclose_tag(self):
         source = '<img src="file.png" />'
         result = '<img src="file.png" />'
