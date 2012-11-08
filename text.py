@@ -109,10 +109,14 @@ def toolset(interwiki, namespaces):
         node.value = '>'
 
     def process_attribute(node, allowed_tag):
-        assert len(node.value) == 2, "Bad AST shape!"
-        attribute_name = node.value[0].value
-        attribute_value = node.value[1].value
-        return '%s="%s"' % (attribute_name, attribute_value)
+        assert len(node.value) in [1,2], "Bad AST shape!"
+        if len(node.value) == 1:
+            attribute_name = node.value[0].value
+            return '%s' % attribute_name
+        elif len(node.value) == 2:
+            attribute_name = node.value[0].value
+            attribute_value = node.value[1].value
+            return '%s="%s"' % (attribute_name, attribute_value)
 
     def process_attributes(node, allowed_tag):
         result = ''
