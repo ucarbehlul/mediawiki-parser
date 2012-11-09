@@ -215,7 +215,7 @@
     table_other_cell        : (PIPE{2} table_cell)*                                                 : liftValue liftNode
     table_line_cells        : PIPE table_cell table_other_cell                                      : render_table_normal_cell
     table_line_header       : BANG table_cell table_other_cell                                      : render_table_header_cell
-    table_empty_cell        : PIPE EOL &(PIPE/BANG/TABLE_END)                                       : keep
+    table_empty_cell        : PIPE EOL &(PIPE/BANG/TABLE_END)                                       : keep render_table_empty_cell
     table_line_break        : TABLE_NEWLINE table_parameters* EOL                                   : keep liftValue render_table_line_break
     table_title             : TABLE_TITLE table_parameter inline EOL                                : liftValue render_table_caption
     table_special_line      : table_title / table_line_break
@@ -501,7 +501,7 @@ def make_parser(actions=None):
     table_other_cell = Repetition(Sequence([Repetition(PIPE, numMin=2, numMax=2, expression='PIPE{2}'), table_cell], expression='PIPE{2} table_cell'), numMin=False, numMax=False, expression='(PIPE{2} table_cell)*', name='table_other_cell')(toolset['liftValue'], toolset['liftNode'])
     table_line_cells = Sequence([PIPE, table_cell, table_other_cell], expression='PIPE table_cell table_other_cell', name='table_line_cells')(toolset['render_table_normal_cell'])
     table_line_header = Sequence([BANG, table_cell, table_other_cell], expression='BANG table_cell table_other_cell', name='table_line_header')(toolset['render_table_header_cell'])
-    table_empty_cell = Sequence([PIPE, EOL, Next(Choice([PIPE, BANG, TABLE_END], expression='PIPE/BANG/TABLE_END'), expression='&(PIPE/BANG/TABLE_END)')], expression='PIPE EOL &(PIPE/BANG/TABLE_END)', name='table_empty_cell')(toolset['keep'])
+    table_empty_cell = Sequence([PIPE, EOL, Next(Choice([PIPE, BANG, TABLE_END], expression='PIPE/BANG/TABLE_END'), expression='&(PIPE/BANG/TABLE_END)')], expression='PIPE EOL &(PIPE/BANG/TABLE_END)', name='table_empty_cell')(toolset['keep'], toolset['render_table_empty_cell'])
     table_line_break = Sequence([TABLE_NEWLINE, Repetition(table_parameters, numMin=False, numMax=False, expression='table_parameters*'), EOL], expression='TABLE_NEWLINE table_parameters* EOL', name='table_line_break')(toolset['keep'], toolset['liftValue'], toolset['render_table_line_break'])
     table_title = Sequence([TABLE_TITLE, table_parameter, inline, EOL], expression='TABLE_TITLE table_parameter inline EOL', name='table_title')(toolset['liftValue'], toolset['render_table_caption'])
     table_special_line = Choice([table_title, table_line_break], expression='table_title / table_line_break', name='table_special_line')

@@ -105,6 +105,7 @@ class HTMLBackendTests(PostprocessorTestCase):
 \t<caption style="color:red"> Table This is the title with a parameter!</caption>
 </tr>
 <tr>
+\t<td></td>
 \t<th scope="col"> Title A</th>
 \t<th scope="col"> Title B</th>
 </tr>
