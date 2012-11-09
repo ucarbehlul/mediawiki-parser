@@ -6,10 +6,8 @@ def replace_by_space(node):
 <definition>
 # Codes
 
-    LF                      : '
-'
-    CR                      : '
-'
+    LF                      : '\x0a'
+    CR                      : '\x0d'
     EOL                     : LF / CR
     TAB                     : "	"
     L_BRACKET               : "["
