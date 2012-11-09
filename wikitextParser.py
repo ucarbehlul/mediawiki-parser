@@ -2,10 +2,8 @@
 <definition>
 # Codes
 
-    LF                      : '
-'
-    CR                      : '
-'
+    LF                      : '\x0a'
+    CR                      : '\x0d'
     EOL                     : LF / CR                                                               : drop
     L_BRACKET               : "["                                                                   : drop
     R_BRACKET               : "\]"                                                                  : drop
@@ -290,8 +288,8 @@ def make_parser(actions=None):
     clean_inline = Recursive(name='clean_inline')
     # Codes
     
-    LF = Char('\n', expression="'\n'", name='LF')
-    CR = Char('\n', expression="'\n'", name='CR')
+    LF = Char('\n', expression="'\\x0a'", name='LF')
+    CR = Char('\r', expression="'\\x0d'", name='CR')
     EOL = Choice([LF, CR], expression='LF / CR', name='EOL')(toolset['drop'])
     L_BRACKET = Word('[', expression='"["', name='L_BRACKET')(toolset['drop'])
     R_BRACKET = Word(']', expression='"\\]"', name='R_BRACKET')(toolset['drop'])
