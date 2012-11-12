@@ -34,6 +34,7 @@ Followed by another one.
    paragraphs:
       paragraph:
          raw_text:This is a paragraph.
+   paragraphs:
       paragraph:
          raw_text:Followed by another one."""
         self.parsed_equal_tree(source, result, None)

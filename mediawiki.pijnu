@@ -69,7 +69,8 @@ def replace_by_8_spaces(node):
     NOWIKI_END              : "</nowiki>"                                                           : drop
     PRE_BEGIN               : "<pre>"                                                               : drop
     PRE_END                 : "</pre>"                                                              : drop
-    SPECIAL_TAG             : NOWIKI_BEGIN/NOWIKI_END/PRE_BEGIN/PRE_END
+    HR                      : ("<hr />" / "<hr>" / "<hr/>" / "</hr>") SPACE*                        : render_hr
+    SPECIAL_TAG             : NOWIKI_BEGIN/NOWIKI_END/PRE_BEGIN/PRE_END/HR
 
 # Characters
 
@@ -99,7 +100,7 @@ def replace_by_8_spaces(node):
     tag_open                : tag_lt tag_name optional_attributes SPACETABEOL* tag_gt               : render_tag_open
     tag_close               : tag_lt SLASH tag_name tag_gt                                          : render_tag_close
     tag_autoclose           : tag_lt tag_name optional_attributes SPACETABEOL* SLASH tag_gt         : render_tag_autoclose
-    tag                     : tag_autoclose / tag_open / tag_close
+    tag                     : !SPECIAL_TAG (tag_autoclose / tag_open / tag_close)                   : liftNode
 
 # HTML entities
 
@@ -115,7 +116,6 @@ def replace_by_8_spaces(node):
 # Text
 
     page_name               : (raw_char / '/')+                                                     : join
-# TODO: allow IPv6 addresses (http://[::1]/etc)
     address                 : (!(QUOTE/R_BRACKET) [\x21..\xff])+                                    : liftValue
     url                     : protocol address                                                      : join
     inline_url              : url{1}                                                                : render_url
@@ -133,10 +133,11 @@ def replace_by_8_spaces(node):
 
 # Pre and nowiki tags
 
-    # Preformatted acts like nowiki (disables wikitext parsing)
+    EOL_KEEP                : EOL                                                                   : restore
+    # Preformatted acts like nowiki (disables wikitext parsing) except it cannot be inline
     tab_to_2_spaces         : TAB                                                                   : replace_by_2_spaces
-    pre_text                : (tab_to_2_spaces / (!PRE_END any_char))*                              : join
-    preformatted            : PRE_BEGIN pre_text PRE_END                                            : liftValue
+    pre_text                : (tab_to_2_spaces / (!PRE_END (any_char/EOL_KEEP)))*                   : join
+    preformatted            : PRE_BEGIN pre_text PRE_END SPACE*                                     : liftValue render_preformatted
     # We allow any char without parsing them as long as the tag is not closed
     eol_to_space            : EOL*                                                                  : replace_by_space
     nowiki_text             : (!NOWIKI_END (any_char/eol_to_space))*                                : join
@@ -144,20 +145,21 @@ def replace_by_8_spaces(node):
 
 # Text types
 
+    inline_end              : preformatted / HR
     styled_text             : link / inline_url / html_comment / tag / entity
-    not_styled_text         : preformatted / nowiki
     allowed_char            : ESC_CHAR{1}                                                           : restore liftValue
-    allowed_text            : raw_text / LT / GT / tab_to_space / allowed_char
-    clean_inline            : (not_styled_text / styled_text / raw_text)+                           : @
-    inline                  : (not_styled_text / styled_text / allowed_text)+                       : @
+    allowed_text            : !inline_end (raw_text / LT / GT / tab_to_space / allowed_char)        : liftNode
+    clean_inline            : (nowiki / styled_text / raw_text)+                                    : @
+    inline                  : (nowiki / styled_text / allowed_text)+                                : @
 
 # Paragraphs
 
     special_line_begin      : SPACE/EQUAL/BULLET/HASH/COLON/DASH{4}/TABLE_BEGIN/SEMICOLON
-    paragraph_line          : !special_line_begin inline EOL                                        : liftValue
-    blank_paragraph         : EOL{2}                                                                : drop keep
+    paragraph_inline        : !inline_end inline                                                    : liftNode
+    paragraph_line          : !(special_line_begin / inline_end) paragraph_inline EOL?              : liftValue
     paragraph               : paragraph_line+                                                       : liftValue render_paragraph
-    paragraphs              : (blank_paragraph/EOL/paragraph)+
+    blank_paragraph         : EOL{2}                                                                : drop keep
+    paragraphs              : (blank_paragraph/paragraph)+
 
 # Titles
 
@@ -191,24 +193,20 @@ def replace_by_8_spaces(node):
     list_item               : sub_list / list_leaf                                                  : @
     list                    : list_item+                                                            : render_list
 
-# Preformatted
+# Preformatted lines
 
-    EOL_KEEP                : EOL                                                                   : restore
     tab_to_8_spaces         : TAB                                                                   : replace_by_8_spaces
     any_char_but_tab        : raw_text / LT / GT / (!TAB ESC_CHAR)                                  : join
-    preformatted_inline     : (tab_to_8_spaces / not_styled_text / styled_text / any_char_but_tab)+
+    preformatted_inline     : (tab_to_8_spaces / nowiki / styled_text / any_char_but_tab)+
     preformatted_line       : SPACE preformatted_inline EOL_KEEP                                    : liftValue
-    preformatted_lines      : preformatted_line+
-    preformatted_text       : preformatted_inline EOL?                                              : liftValue
-    preformatted_paragraph  : PRE_BEGIN EOL preformatted_text PRE_END EOL
-    preformatted_group      : preformatted_paragraph / preformatted_lines                           : render_preformatted
+    preformatted_lines      : preformatted_line+                                                    : render_preformatted
 
 # Special lines
 
     horizontal_rule         : DASH{4} DASH* inline* EOL                                             : liftValue keep render_hr
 
     # This should never happen
-    invalid_line            : any_text EOL                                                          : liftValue
+    invalid_line            : any_text EOL                                                          : liftValue render_invalid
 
 # Tables
 
@@ -216,10 +214,10 @@ def replace_by_8_spaces(node):
     table_parameters_pipe   : (SPACETAB* HTML_attribute+ SPACETAB* PIPE !PIPE)?                     : liftNode
     table_parameters        : (HTML_attribute / clean_inline)+
     table_parameter         : table_parameters_pipe{0..1}                                           : liftValue
-    table_wikitext          : list/horizontal_rule/preformatted_group/title/table_structure
-    table_inline            : !(PIPE/BANG) clean_inline EOL?                                        : liftNode
+    table_wikitext          : list/horizontal_rule/preformatted_lines/title/table_structure
+    table_inline            : !(PIPE/BANG) clean_inline EOL?                                        : liftValue
     table_paragraph         : (!(PIPE/BANG/TABLE_NEWLINE/TABLE_TITLE/TABLE_END) paragraph_line)     : render_paragraph
-    table_multiline_content : (table_paragraph / table_wikitext / EOL)*
+    table_multiline_content : (table_paragraph / preformatted / table_wikitext / EOL)*
     table_cell_content      : table_inline? table_multiline_content                                 : liftValue
     table_cell              : table_parameter table_cell_content
     table_other_cell        : (PIPE{2} table_cell)*                                                 : liftValue liftNode
@@ -238,6 +236,6 @@ def replace_by_8_spaces(node):
 
 # Top pattern
 
-    valid_syntax            : list/horizontal_rule/preformatted_group/title/table/EOL/paragraphs
+    valid_syntax            : list/horizontal_rule/preformatted_lines/title/table/preformatted/HR/EOL/paragraphs
     wikitext                : optional_comment (valid_syntax/invalid_line)+                         : liftValue render_wikitext
     body                    : wikitext{1}                                                           : liftValue render_body

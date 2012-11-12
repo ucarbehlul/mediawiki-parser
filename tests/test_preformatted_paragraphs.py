@@ -31,6 +31,34 @@ Followed by a "normal" one.
          raw_text:Followed by a "normal" one."""
         self.parsed_equal_tree(source, result, None)
 
+    def test_normal_and_preformatted_paragraphs(self):
+        source = """This is a normal paragraph
+ Followed by
+ a few preformatted
+ lines
+"""
+        result = """body:
+   paragraphs:
+      paragraph:
+         raw_text:This is a normal paragraph
+   preformatted_lines:
+      preformatted_line:
+         preformatted_inline:
+            raw_text:Followed by
+         EOL_KEEP:
+
+      preformatted_line:
+         preformatted_inline:
+            raw_text:a few preformatted
+         EOL_KEEP:
+
+      preformatted_line:
+         preformatted_inline:
+            raw_text:lines
+         EOL_KEEP:
+"""
+        self.parsed_equal_tree(source, result, None)
+
     def test_multiline_paragraph(self):
         source = """ This is a multiline
  preformatted paragraph.
@@ -99,15 +127,36 @@ Preformatted paragraph.
 </pre>
 """
         result = """body:
-   preformatted_paragraph:
-      preformatted_text:
-         raw_text:Preformatted paragraph."""
+   preformatted:
+Preformatted paragraph.
+"""
+        self.parsed_equal_tree(source, result, None)
+
+    def test_html_multiline_pre_paragraph(self):
+        source = """<pre>
+
+This is a multiline...
+
+
+...preformatted paragraph.
+
+</pre>
+"""
+        result = """body:
+   preformatted:
+
+This is a multiline...
+
+
+...preformatted paragraph.
+
+"""
         self.parsed_equal_tree(source, result, None)
 
     def test_formatted_html_pre_paragraph(self):
         # <pre> should act like <nowiki>
         source = "<pre>some [[text]] that should {{not}} be changed</pre>\n"
-        result = "[paragraphs:[paragraph:[preformatted:'some [[text]] that should {{not}} be changed']]]"
+        result = "[preformatted:'some [[text]] that should {{not}} be changed']"
         self.parsed_equal_string(source, result, None)
 
     def test_html_pre_in_paragraph(self):
@@ -116,8 +165,10 @@ Preformatted paragraph.
    paragraphs:
       paragraph:
          raw_text:Normal paragraph 
-         preformatted:Preformatted one
-         raw_text: Normal one."""
+   preformatted:Preformatted one
+   paragraphs:
+      paragraph:
+         raw_text:Normal one."""
         self.parsed_equal_tree(source, result, None)
 
     def test_pre_paragraph_in_table(self):
@@ -132,6 +183,8 @@ Preformatted paragraph.
       table_line_header:
          table_cell:
             table_cell_content:
-               raw_text: 
-               preformatted:Text"""
+               table_inline:
+                  raw_text: 
+               table_multiline_content:
+                  preformatted:Text"""
         self.parsed_equal_tree(source, result, None)

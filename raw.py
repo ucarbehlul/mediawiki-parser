@@ -96,6 +96,9 @@ def toolset():
     def render_internal_link(node):
         pass
 
+    def render_invalid(node):
+        pass
+
     return locals()
 
 def make_parser():

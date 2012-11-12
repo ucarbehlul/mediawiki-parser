@@ -1,3 +1,4 @@
+
 from constants import html_entities
 from pijnu.library.node import Nil, Nodes, Node
 from mediawiki_parser import wikitextParser
@@ -417,6 +418,9 @@ def toolset(allowed_tags, allowed_autoclose_tags, allowed_attributes, interwiki,
         else:
             text = '|'.join('%s' % item.leaf() for item in node.value[0])
         node.value = '<a href="%s%s">%s</a>' % (url, page_name, text)
+
+    def render_invalid(node):
+        node.value = '<span style="color:red">Invalid line: %s</span>' % node.leaf()
 
     return locals()
 
