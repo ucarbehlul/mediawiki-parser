@@ -395,6 +395,9 @@ def toolset(interwiki, namespaces):
             text = '|'.join('%s' % item.leaf() for item in node.value[0])
         node.value = '%s (link: %s%s)' % (text, url, page_name)
 
+    def render_invalid(node):
+        pass
+
     return locals()
 
 def make_parser(interwiki={}, namespaces={}):

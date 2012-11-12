@@ -132,7 +132,7 @@ test2
         result = """table:
    table_cell:
       table_cell_content:
-         @clean_inline@:
+         table_inline:
             raw_text: test1
          table_multiline_content:
             table_paragraph:
