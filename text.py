@@ -22,7 +22,7 @@ def toolset(interwiki, namespaces):
     interwiki_links = []
     """ This will contain the links to the foreign versions of the article. """
 
-    style_tags = {'bold': '*', 'bold_close': '*', 'italic': '_', 'italic_close': '_'}
+    style_tags = {'bold': '', 'bold_close': '', 'italic': '', 'italic_close': ''}
 
     for namespace, value in namespaces.iteritems():
         assert value in range(16), "Incorrect value for namespaces"
@@ -393,7 +393,7 @@ def toolset(interwiki, namespaces):
             text = page_name
         else:
             text = '|'.join('%s' % item.leaf() for item in node.value[0])
-        node.value = '%s (link: %s%s)' % (text, url, page_name)
+        node.value = '%s' % (text)
 
     def render_invalid(node):
         pass
