@@ -1,4 +1,5 @@
 from constants import html_entities
+import pijnu
 
 templates = {}
 parsed_templates = {}  # Caches templates, to accelerate and avoid infinite loops
@@ -79,13 +80,16 @@ toolset = {'substitute_template': substitute_template,
            'substitute_named_entity': substitute_named_entity,
            'substitute_numbered_entity': substitute_numbered_entity}
 
-from mediawiki_parser import preprocessorParser
+import preprocessorParser
 
 def make_parser(template_dict):
     global templates
     templates = template_dict
     global parsed_templates
     parsed_templates = {}
+#     from pijnu import makeParser
+#     myGrammar = file("preprocessor.pijnu").read()
+#     makeParser(myGrammar)(toolset)
     return preprocessorParser.make_parser(toolset)
 
 def parse_template(template, parameters):
