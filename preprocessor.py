@@ -35,6 +35,8 @@ def substitute_template_parameter(node, values={}):
             node.value = '{{{%s}}}' %  parameter_id
 
 def substitute_template(node):
+    '''The function into which wiki template comes, not the
+    user-defined template replacement texts'''
     node_to_str = '%s' % node
     if node_to_str in parsed_templates:
         if parsed_templates[node_to_str] is not None:
@@ -44,7 +46,7 @@ def substitute_template(node):
     else:
         parsed_templates[node_to_str] = None
         if len(node.value) > 0:
-            page_name = node.value[0].value
+            page_name = node.value[0].value.strip()
             count = 0
             parameters = {}
             if len(node.value) > 1:
@@ -74,11 +76,30 @@ def substitute_template(node):
             result = '{{}}'
     node.value = result
     parsed_templates[node_to_str] = result
+    
+def substitute_template_wildcard(node, parameters):
+    low = 1
+    high = len(parameters)
+    value = ""
+    if node.value[0].value != ':':
+       low = int(node.value[0].value)
+    if len(node.value) > 2:
+       high = int(node.value[2].value)
+       if high < 0:
+           high = len(parameters) + high 
+    for num in range(low, high+1):
+        try:
+            value += " [[%s]]" % parameters[str(num)]
+        except KeyError as e:
+            pass
+    node.value = value.strip()
 
 toolset = {'substitute_template': substitute_template,
            'substitute_template_parameter': substitute_template_parameter,
+           'substitute_template_wildcard' : substitute_template_wildcard,
            'substitute_named_entity': substitute_named_entity,
-           'substitute_numbered_entity': substitute_numbered_entity}
+           'substitute_numbered_entity': substitute_numbered_entity,
+                    }
 
 import preprocessorParser
 
@@ -87,16 +108,19 @@ def make_parser(template_dict):
     templates = template_dict
     global parsed_templates
     parsed_templates = {}
-#     from pijnu import makeParser
-#     myGrammar = file("preprocessor.pijnu").read()
-#     makeParser(myGrammar)(toolset)
-    return preprocessorParser.make_parser(toolset)
+    from pijnu import makeParser
+    myGrammar = file("preprocessor.pijnu").read()
+    return makeParser(myGrammar)(toolset)
+#     return preprocessorParser.make_parser(toolset)
 
 def parse_template(template, parameters):
     def subst_param(node):
         substitute_template_parameter(node, parameters)
-
+    def subst_wildcard(node):
+        substitute_template_wildcard(node, parameters)
+        
     toolset['substitute_template_parameter'] = subst_param
+    toolset['substitute_template_wildcard'] = subst_wildcard
     parser = preprocessorParser.make_parser(toolset)
     result = parser.parse(template)
     

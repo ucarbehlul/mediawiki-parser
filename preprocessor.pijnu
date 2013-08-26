@@ -25,6 +25,7 @@ def replace_by_space(node):
     HASH                    : "#"                                                                   : drop
     DASH                    : "-"                                                                   : drop
     AMP                     : "&"                                                                   : drop
+    COLON					: ":"																	: drop
     SEMICOLON               : ";"                                                                   : drop
     TEMPLATE_BEGIN          : L_BRACE{2}                                                            : drop
     TEMPLATE_END            : R_BRACE{2}                                                            : drop
@@ -45,6 +46,8 @@ def replace_by_space(node):
     esc_char                : L_BRACKET/R_BRACKET/PIPE/L_BRACE/R_BRACE/LT/GT/AMP/SEMICOLON
     raw_char                : !esc_char any_char
     raw_text                : (raw_char / TAB)+                                                     : join
+    numeral					: [0..9]
+    number					: numeral+
 
 # HTML comments
 # HTML comments are totally ignored and do not appear in the final text
@@ -55,7 +58,7 @@ def replace_by_space(node):
 # Text
 
     page_name               : raw_char+                                                             : join
-
+	
 # Template parameters
 # Those parameters should be substituted by their value when the current page is a template
 # or by their optional default value in any case
@@ -63,7 +66,7 @@ def replace_by_space(node):
     parameter_id            : raw_char+                                                             : join
     parameter_value         : inline?                                                               : keep
     optional_default_value  : (PIPE SPACETABEOL* parameter_value)? SPACETABEOL*                     : liftNode
-    template_parameter      : PARAMETER_BEGIN parameter_id optional_default_value PARAMETER_END     : substitute_template_parameter
+    template_parameter      : PARAMETER_BEGIN parameter_id optional_default_value PARAMETER_END     : substitute_template_parameter 	    
 
 # Links
 
@@ -92,6 +95,10 @@ def replace_by_space(node):
     numbered_entity         : AMP HASH [0..9]+ SEMICOLON                                            : substitute_numbered_entity
     named_entity            : AMP [a..zA..Z]+ SEMICOLON                                             : substitute_named_entity
     entity                  : named_entity / numbered_entity
+    
+# wildcard in templates
+	divider		: COLON 	: keep
+	wildcard	: L_BRACE{4} number? divider number? R_BRACE{4}											: substitute_template_wildcard    
 
 # Pre and nowiki tags
 # Preformatted acts like nowiki (disables wikitext parsing)
@@ -105,7 +112,7 @@ def replace_by_space(node):
 
 # Text types
 
-    styled_text             : template / template_parameter / entity
+    styled_text             : template / template_parameter / entity / wildcard
     not_styled_text         : html_comment / preformatted / nowiki
     allowed_char            : esc_char{1}                                                           : restore liftValue
     allowed_text            : raw_text / allowed_char

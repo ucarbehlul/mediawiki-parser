@@ -21,6 +21,7 @@
     HASH                    : "#"                                                                   : drop
     DASH                    : "-"                                                                   : drop
     AMP                     : "&"                                                                   : drop
+    COLON					: ":"																	: drop
     SEMICOLON               : ";"                                                                   : drop
     TEMPLATE_BEGIN          : L_BRACE{2}                                                            : drop
     TEMPLATE_END            : R_BRACE{2}                                                            : drop
@@ -41,6 +42,8 @@
     esc_char                : L_BRACKET/R_BRACKET/PIPE/L_BRACE/R_BRACE/LT/GT/AMP/SEMICOLON
     raw_char                : !esc_char any_char
     raw_text                : (raw_char / TAB)+                                                     : join
+    numeral					: [0..9]
+    number					: numeral+
 
 # HTML comments
 # HTML comments are totally ignored and do not appear in the final text
@@ -51,7 +54,7 @@
 # Text
 
     page_name               : raw_char+                                                             : join
-
+	
 # Template parameters
 # Those parameters should be substituted by their value when the current page is a template
 # or by their optional default value in any case
@@ -59,7 +62,7 @@
     parameter_id            : raw_char+                                                             : join
     parameter_value         : inline?                                                               : keep
     optional_default_value  : (PIPE SPACETABEOL* parameter_value)? SPACETABEOL*                     : liftNode
-    template_parameter      : PARAMETER_BEGIN parameter_id optional_default_value PARAMETER_END     : substitute_template_parameter
+    template_parameter      : PARAMETER_BEGIN parameter_id optional_default_value PARAMETER_END     : substitute_template_parameter 	    
 
 # Links
 
@@ -88,6 +91,10 @@
     numbered_entity         : AMP HASH [0..9]+ SEMICOLON                                            : substitute_numbered_entity
     named_entity            : AMP [a..zA..Z]+ SEMICOLON                                             : substitute_named_entity
     entity                  : named_entity / numbered_entity
+    
+# wildcard in templates
+	divider		: COLON 	: keep
+	wildcard	: L_BRACE{4} number? divider number? R_BRACE{4}											: substitute_template_wildcard    
 
 # Pre and nowiki tags
 # Preformatted acts like nowiki (disables wikitext parsing)
@@ -101,7 +108,7 @@
 
 # Text types
 
-    styled_text             : template / template_parameter / entity
+    styled_text             : template / template_parameter / entity / wildcard
     not_styled_text         : html_comment / preformatted / nowiki
     allowed_char            : esc_char{1}                                                           : restore liftValue
     allowed_text            : raw_text / allowed_char
@@ -167,6 +174,7 @@ def make_parser(actions=None):
     HASH = Word('#', expression='"#"', name='HASH')(toolset['drop'])
     DASH = Word('-', expression='"-"', name='DASH')(toolset['drop'])
     AMP = Word('&', expression='"&"', name='AMP')(toolset['drop'])
+    COLON = Word(':', expression='":"', name='COLON')(toolset['drop'])
     SEMICOLON = Word(';', expression='";"', name='SEMICOLON')(toolset['drop'])
     TEMPLATE_BEGIN = Repetition(L_BRACE, numMin=2, numMax=2, expression='L_BRACE{2}', name='TEMPLATE_BEGIN')(toolset['drop'])
     TEMPLATE_END = Repetition(R_BRACE, numMin=2, numMax=2, expression='R_BRACE{2}', name='TEMPLATE_END')(toolset['drop'])
@@ -187,6 +195,8 @@ def make_parser(actions=None):
     esc_char = Choice([L_BRACKET, R_BRACKET, PIPE, L_BRACE, R_BRACE, LT, GT, AMP, SEMICOLON], expression='L_BRACKET/R_BRACKET/PIPE/L_BRACE/R_BRACE/LT/GT/AMP/SEMICOLON', name='esc_char')
     raw_char = Sequence([NextNot(esc_char, expression='!esc_char'), any_char], expression='!esc_char any_char', name='raw_char')
     raw_text = Repetition(Choice([raw_char, TAB], expression='raw_char / TAB'), numMin=1, numMax=False, expression='(raw_char / TAB)+', name='raw_text')(toolset['join'])
+    numeral = Klass(u'0123456789', expression='[0..9]', name='numeral')
+    number = Repetition(numeral, numMin=1, numMax=False, expression='numeral+', name='number')
     
     # HTML comments
     # HTML comments are totally ignored and do not appear in the final text
@@ -197,7 +207,7 @@ def make_parser(actions=None):
     # Text
     
     page_name = Repetition(raw_char, numMin=1, numMax=False, expression='raw_char+', name='page_name')(toolset['join'])
-    
+    	
     # Template parameters
     # Those parameters should be substituted by their value when the current page is a template
     # or by their optional default value in any case
@@ -234,6 +244,10 @@ def make_parser(actions=None):
     numbered_entity = Sequence([AMP, HASH, Repetition(Klass(u'0123456789', expression='[0..9]'), numMin=1, numMax=False, expression='[0..9]+'), SEMICOLON], expression='AMP HASH [0..9]+ SEMICOLON', name='numbered_entity')(toolset['substitute_numbered_entity'])
     named_entity = Sequence([AMP, Repetition(Klass(u'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', expression='[a..zA..Z]'), numMin=1, numMax=False, expression='[a..zA..Z]+'), SEMICOLON], expression='AMP [a..zA..Z]+ SEMICOLON', name='named_entity')(toolset['substitute_named_entity'])
     entity = Choice([named_entity, numbered_entity], expression='named_entity / numbered_entity', name='entity')
+        
+    # wildcard in templates
+    divider = Clone(COLON, expression='COLON', name='divider')(toolset['keep'])
+    wildcard = Sequence([Repetition(L_BRACE, numMin=4, numMax=4, expression='L_BRACE{4}'), Option(number, expression='number?'), divider, Option(number, expression='number?'), Repetition(R_BRACE, numMin=4, numMax=4, expression='R_BRACE{4}')], expression='L_BRACE{4} number? divider number? R_BRACE{4}', name='wildcard')(toolset['substitute_template_wildcard'])
     
     # Pre and nowiki tags
     # Preformatted acts like nowiki (disables wikitext parsing)
@@ -247,7 +261,7 @@ def make_parser(actions=None):
     
     # Text types
     
-    styled_text = Choice([template, template_parameter, entity], expression='template / template_parameter / entity', name='styled_text')
+    styled_text = Choice([template, template_parameter, entity, wildcard], expression='template / template_parameter / entity / wildcard', name='styled_text')
     not_styled_text = Choice([html_comment, preformatted, nowiki], expression='html_comment / preformatted / nowiki', name='not_styled_text')
     allowed_char = Repetition(esc_char, numMin=1, numMax=1, expression='esc_char{1}', name='allowed_char')(toolset['restore'], toolset['liftValue'])
     allowed_text = Choice([raw_text, allowed_char], expression='raw_text / allowed_char', name='allowed_text')
