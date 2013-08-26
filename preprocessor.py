@@ -102,6 +102,7 @@ toolset = {'substitute_template': substitute_template,
                     }
 
 import preprocessorParser
+from mediawiki_parser import preprocessorParser
 
 def make_parser(template_dict):
     global templates
@@ -112,6 +113,7 @@ def make_parser(template_dict):
     myGrammar = file("preprocessor.pijnu").read()
     return makeParser(myGrammar)(toolset)
 #     return preprocessorParser.make_parser(toolset)
+    return preprocessorParser.make_parser(toolset)
 
 def parse_template(template, parameters):
     def subst_param(node):
@@ -121,6 +123,7 @@ def parse_template(template, parameters):
         
     toolset['substitute_template_parameter'] = subst_param
     toolset['substitute_template_wildcard'] = subst_wildcard
+
     parser = preprocessorParser.make_parser(toolset)
     result = parser.parse(template)
     

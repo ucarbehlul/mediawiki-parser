@@ -54,7 +54,7 @@
 # Text
 
     page_name               : raw_char+                                                             : join
-	
+
 # Template parameters
 # Those parameters should be substituted by their value when the current page is a template
 # or by their optional default value in any case
@@ -207,7 +207,7 @@ def make_parser(actions=None):
     # Text
     
     page_name = Repetition(raw_char, numMin=1, numMax=False, expression='raw_char+', name='page_name')(toolset['join'])
-    	
+    
     # Template parameters
     # Those parameters should be substituted by their value when the current page is a template
     # or by their optional default value in any case
