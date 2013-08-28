@@ -170,5 +170,5 @@ def parse_one_line(text, tags=default_tags):
 
 
 def parse(text, tags=default_tags):
-    lines = text.split(u'\n')
-    return u'\n'.join(parse_one_line(line, tags) for line in lines)
+    lines = text.split('\n')
+    return '\n'.join(parse_one_line(line, tags) for line in lines)
