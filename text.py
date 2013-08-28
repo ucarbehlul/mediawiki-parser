@@ -59,28 +59,28 @@ def toolset(interwiki, namespaces):
         return apostrophes.parse('%s' % node.leaf(), style_tags)
 
     def render_title1(node):
-        node.value = '%s\n' % node.leaf()
+        node.value = u'%s\n' % node.leaf()
 
     def render_title2(node):
-        node.value = '%s\n' % node.leaf()
+        node.value = u'%s\n' % node.leaf()
 
     def render_title3(node):
-        node.value = '%s\n' % node.leaf()
+        node.value = u'%s\n' % node.leaf()
 
     def render_title4(node):
-        node.value = '%s\n' % node.leaf()
+        node.value = u'%s\n' % node.leaf()
 
     def render_title5(node):
-        node.value = '%s\n' % node.leaf()
+        node.value = u'%s\n' % node.leaf()
 
     def render_title6(node):
-        node.value = '%s\n' % node.leaf()
+        node.value = u'%s\n' % node.leaf()
 
     def render_raw_text(node):
         pass
 
     def render_paragraph(node):
-        node.value = '%s\n' % node.leaf()
+        node.value = u'%s\n' % node.leaf()
 
     def render_wikitext(node):
         pass
@@ -88,17 +88,17 @@ def toolset(interwiki, namespaces):
     def render_body(node):
         metadata = ''
         if external_links != []:
-            metadata += '\nLinks:\n' + '\n'.join(external_links) + '\n'
+            metadata += u'\nLinks:\n' + '\n'.join(external_links) + '\n'
         if category_links != []:
-            metadata += '\nCategories:\n' + '\n'.join(category_links) + '\n'
+            metadata += u'\nCategories:\n' + '\n'.join(category_links) + '\n'
         if interwiki_links != []:
-            metadata += '\nInterwiki:\n' + '\n'.join(interwiki_links) + '\n'
-        node.value = apostrophes.parse('%s' % node.leaves(), style_tags) + metadata
+            metadata += u'\nInterwiki:\n' + '\n'.join(interwiki_links) + '\n'
+        node.value = apostrophes.parse(u'%s' % unicode(node.leaves()), style_tags) + metadata
 
     def render_entity(node):
-        value = '%s' % node.leaf()
+        value = u'%s' % node.leaf()
         if value in html_entities:
-            node.value = '%s' % unichr(html_entities[value])
+            node.value = u'%s' % unichr(html_entities[value])
         else:
             node.value = '&amp;%s;' % value
 
@@ -112,11 +112,11 @@ def toolset(interwiki, namespaces):
         assert len(node.value) in [1,2], "Bad AST shape!"
         if len(node.value) == 1:
             attribute_name = node.value[0].value
-            return '%s' % attribute_name
+            return u'%s' % attribute_name
         elif len(node.value) == 2:
             attribute_name = node.value[0].value
             attribute_value = node.value[1].value
-            return '%s="%s"' % (attribute_name, attribute_value)
+            return u'%s="%s"' % (attribute_name, attribute_value)
 
     def process_attributes(node, allowed_tag):
         result = ''
@@ -190,10 +190,10 @@ def toolset(interwiki, namespaces):
         if isinstance(node.value, Nodes):
             for i in range(len(node.value)):
                 content = render_cell_content(node.value[i])
-                result += '%s\t' % content
+                result += u'%s\t' % content
         else:
             content = render_cell_content(node)
-            result = '%s\t' % content            
+            result = u'%s\t' % content            
         if result != '':
             node.value = result
 
@@ -202,10 +202,10 @@ def toolset(interwiki, namespaces):
         if isinstance(node.value, Nodes):
             for i in range(len(node.value)):
                 content = render_cell_content(node.value[i])
-                result += '%s\t' % content
+                result += u'%s\t' % content
         else:
             content = render_cell_content(node)
-            result = '%s\t' % content            
+            result = u'%s\t' % content            
         if result != '':
             node.value = result
 
@@ -237,7 +237,7 @@ def toolset(interwiki, namespaces):
         indent = level * '\t'
         result = '\n'
         for i in range(len(list)):
-            result += indent + '%i. %s\n' % (i + 1, content(list[i]))
+            result += indent + u'%i. %s\n' % (i + 1, content(list[i]))
         return result
 
     def render_dd(list, level):
@@ -333,7 +333,7 @@ def toolset(interwiki, namespaces):
         if arguments != []:
             parameters = arguments[0].value
             for parameter in parameters:
-                parameter = '%s' % parameter.leaf()
+                parameter = u'%s' % parameter.leaf()
                 if parameter[-2:] == 'px':
                     size = parameter[0:-2]
                     if 'x' in size:
@@ -360,7 +360,7 @@ def toolset(interwiki, namespaces):
                     legend = parameter
         result = 'Image: %s, style: %s' % (file_name, style)
         if thumbnail:
-            result = '%s, legend:%s\n' % (result, legend)
+            result = u'%s, legend:%s\n' % (result, legend)
         return result
 
     def render_internal_link(node):
@@ -393,7 +393,7 @@ def toolset(interwiki, namespaces):
             text = page_name
         else:
             text = '|'.join('%s' % item.leaf() for item in node.value[0])
-        node.value = '%s' % (text)
+        node.value = u'%s' % (text)
 
     def render_invalid(node):
         pass
