@@ -31,12 +31,12 @@ interwiki = {'ar': 'http://ar.wikipedia.org/wiki/',
              'fr': 'http://fr.wikipedia.org/wiki/'}
 
 namespaces = {'Template':   10,
-              u'Catégorie': 14,
+              'Catégorie': 14,
               'Category':   14,
               'File':        6,
               'Fichier':     6,
               'Image':       6}
-templates = {'listen': u"""{| style="text-align:center; background: #f9f9f9; color: #000;font-size:90%; line-height:1.1em; float:right;clear:right; margin:1em 1.5em 1em 1em; width:300px; border: 1px solid #aaa; padding: 0.1em;" cellspacing="7"
+templates = {'listen': """{| style="text-align:center; background: #f9f9f9; color: #000;font-size:90%; line-height:1.1em; float:right;clear:right; margin:1em 1.5em 1em 1em; width:300px; border: 1px solid #aaa; padding: 0.1em;" cellspacing="7"
 ! class="media audio" style="background-color:#ccf; line-height:3.1em" | Fichier audio
 |-
 |<span style="height:20px; width:100%; padding:4pt; padding-left:0.3em; line-height:2em;" cellspacing="0">'''[[Media:{{{filename|{{{nomfichier|{{{2|}}}}}}}}}|{{{title|{{{titre|{{{1|}}}}}}}}}]]''' ''([[:Fichier:{{{filename|{{{nomfichier|{{{2|}}}}}}}}}|info]])''<br /><small>{{{suitetexte|{{{description|}}}}}}</small>

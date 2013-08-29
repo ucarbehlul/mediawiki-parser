@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
 
-_quotePat = re.compile(u"(''+)", re.UNICODE)
+_quotePat = re.compile("(''+)", re.UNICODE)
 
 default_tags = {'bold': '<strong>',
                 'bold_close': '</strong>',
@@ -40,11 +40,11 @@ def parse_one_line(text, tags=default_tags):
             if i % 2:
                 l = len(r)
                 if l == 4:
-                    arr[i-1] += u"'"
-                    arr[i] = u"'''"
+                    arr[i-1] += "'"
+                    arr[i] = "'''"
                 elif l > 5:
-                    arr[i-1] += u"'" * (len(arr[i]) - 5)
-                    arr[i] = u"'''''"
+                    arr[i-1] += "'" * (len(arr[i]) - 5)
+                    arr[i] = "'''''"
                 if l == 2:
                     numItalics += 1
                 elif l == 3:
@@ -63,10 +63,10 @@ def parse_one_line(text, tags=default_tags):
                 if i % 2 and len(r) == 3:
                     x1 = arr[i-1][-1:]
                     x2 = arr[i-1][-2:-1]
-                    if x1 == u' ':
+                    if x1 == ' ':
                         if firstSpace == -1:
                             firstSpace = i
-                    elif x2 == u' ':
+                    elif x2 == ' ':
                         if firstSingleLetterWord == -1:
                             firstSingleLetterWord = i
                     elif firstMultiLetterWord == -1:
@@ -74,18 +74,18 @@ def parse_one_line(text, tags=default_tags):
 
             # If there is a single-letter word, use it!
             if firstSingleLetterWord > -1:
-                arr[firstSingleLetterWord] = u"''"
-                arr[firstSingleLetterWord - 1] += u"'"
+                arr[firstSingleLetterWord] = "''"
+                arr[firstSingleLetterWord - 1] += "'"
             # If not, but there's a multi-letter word, use that one.
             elif firstMultiLetterWord > -1:
-                arr[firstMultiLetterWord] = u"''"
-                arr[firstMultiLetterWord - 1] += u"'"
+                arr[firstMultiLetterWord] = "''"
+                arr[firstMultiLetterWord - 1] += "'"
             # ... otherwise use the first one that has neither.
             # (notice that it is possible for all three to be -1 if, for example,
             # there is only one pentuple-apostrophe in the line)
             elif firstSpace > -1:
-                arr[firstSpace] = u"''"
-                arr[firstSpace - 1] += u"'"
+                arr[firstSpace] = "''"
+                arr[firstSpace - 1] += "'"
 
         # Now let's actually convert our apostrophic mush to HTML!
         output = []
@@ -110,7 +110,7 @@ def parse_one_line(text, tags=default_tags):
                         state = 'b'
                     elif state == 'both':
                         output.append(tags['bold']+tags['italic'])
-                        output.append(u''.join(buffer))
+                        output.append(''.join(buffer))
                         output.append(tags['italic_close'])
                         state = 'b'
                     else: # ''
@@ -128,7 +128,7 @@ def parse_one_line(text, tags=default_tags):
                         state = 'i'
                     elif state == 'both':
                         output.append(tags['italic']+tags['bold'])
-                        output.append(u''.join(buffer))
+                        output.append(''.join(buffer))
                         output.append(tags['bold_close'])
                         state = 'i'
                     else: # ''
@@ -149,7 +149,7 @@ def parse_one_line(text, tags=default_tags):
                         state = ''
                     elif state == 'both':
                         output.append(tags['italic']+tags['bold'])
-                        output.append(u''.join(buffer))
+                        output.append(''.join(buffer))
                         output.append(tags['bold_close']+tags['italic_close'])
                         state = ''
                     else: # ''
@@ -164,9 +164,9 @@ def parse_one_line(text, tags=default_tags):
             output.append(tags['bold_close'])
         if state == 'both' and buffer != []:
             output.append(tags['italic']+tags['bold'])
-            output.append(u''.join(buffer))
+            output.append(''.join(buffer))
             output.append(tags['bold_close']+tags['italic_close'])
-        return u''.join(output)
+        return ''.join(output)
 
 
 def parse(text, tags=default_tags):
