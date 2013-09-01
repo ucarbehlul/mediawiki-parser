@@ -47,7 +47,7 @@ def replace_by_space(node):
     raw_char                : !esc_char any_char
     raw_text                : (raw_char / TAB)+                                                     : join
     numeral					: [0..9]
-    number					: numeral+
+    number					: "-"? numeral+                                                         : join
 
 # HTML comments
 # HTML comments are totally ignored and do not appear in the final text

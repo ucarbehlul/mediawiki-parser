@@ -43,7 +43,7 @@
     raw_char                : !esc_char any_char
     raw_text                : (raw_char / TAB)+                                                     : join
     numeral					: [0..9]
-    number					: numeral+
+    number					: "-"? numeral+                                                         : join
 
 # HTML comments
 # HTML comments are totally ignored and do not appear in the final text
@@ -191,17 +191,17 @@ def make_parser(actions=None):
     
     # Characters
     
-    any_char = Choice([Klass(' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff', expression='[\\x20..\\xff]'), Char('/', expression="'/'")], expression="[\\x20..\\xff] / '/'", name='any_char')
+    any_char = Choice([Klass(u' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff', expression='[\\x20..\\xff]'), Char('/', expression="'/'")], expression="[\\x20..\\xff] / '/'", name='any_char')
     esc_char = Choice([L_BRACKET, R_BRACKET, PIPE, L_BRACE, R_BRACE, LT, GT, AMP, SEMICOLON], expression='L_BRACKET/R_BRACKET/PIPE/L_BRACE/R_BRACE/LT/GT/AMP/SEMICOLON', name='esc_char')
     raw_char = Sequence([NextNot(esc_char, expression='!esc_char'), any_char], expression='!esc_char any_char', name='raw_char')
     raw_text = Repetition(Choice([raw_char, TAB], expression='raw_char / TAB'), numMin=1, numMax=False, expression='(raw_char / TAB)+', name='raw_text')(toolset['join'])
-    numeral = Klass('0123456789', expression='[0..9]', name='numeral')
-    number = Repetition(numeral, numMin=1, numMax=False, expression='numeral+', name='number')
+    numeral = Klass(u'0123456789', expression='[0..9]', name='numeral')
+    number = Sequence([Option(Word('-', expression='"-"'), expression='"-"?'), Repetition(numeral, numMin=1, numMax=False, expression='numeral+')], expression='"-"? numeral+', name='number')(toolset['join'])
     
     # HTML comments
     # HTML comments are totally ignored and do not appear in the final text
     
-    comment_content = Repetition(Choice([Repetition(Sequence([NextNot(Sequence([Repetition(DASH, numMin=2, numMax=2, expression='DASH{2}'), GT], expression='DASH{2} GT'), expression='!(DASH{2} GT)'), Klass(' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff', expression='[\\x20..\\xff]')], expression='!(DASH{2} GT) [\\x20..\\xff]'), numMin=1, numMax=False, expression='(!(DASH{2} GT) [\\x20..\\xff])+'), SPACETABEOL], expression='(!(DASH{2} GT) [\\x20..\\xff])+ / SPACETABEOL'), numMin=False, numMax=False, expression='((!(DASH{2} GT) [\\x20..\\xff])+ / SPACETABEOL)*', name='comment_content')
+    comment_content = Repetition(Choice([Repetition(Sequence([NextNot(Sequence([Repetition(DASH, numMin=2, numMax=2, expression='DASH{2}'), GT], expression='DASH{2} GT'), expression='!(DASH{2} GT)'), Klass(u' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff', expression='[\\x20..\\xff]')], expression='!(DASH{2} GT) [\\x20..\\xff]'), numMin=1, numMax=False, expression='(!(DASH{2} GT) [\\x20..\\xff])+'), SPACETABEOL], expression='(!(DASH{2} GT) [\\x20..\\xff])+ / SPACETABEOL'), numMin=False, numMax=False, expression='((!(DASH{2} GT) [\\x20..\\xff])+ / SPACETABEOL)*', name='comment_content')
     html_comment = Sequence([LT, BANG, Repetition(DASH, numMin=2, numMax=2, expression='DASH{2}'), comment_content, Repetition(DASH, numMin=2, numMax=2, expression='DASH{2}'), GT], expression='LT BANG DASH{2} comment_content DASH{2} GT', name='html_comment')(toolset['drop'])
     
     # Text
@@ -241,8 +241,8 @@ def make_parser(actions=None):
     
     structure = Choice([link, template, template_parameter], expression='link / template / template_parameter', name='structure')
     inline **= Repetition(Choice([structure, raw_text], expression='structure / raw_text'), numMin=1, numMax=False, expression='(structure / raw_text)+', name='inline')
-    numbered_entity = Sequence([AMP, HASH, Repetition(Klass('0123456789', expression='[0..9]'), numMin=1, numMax=False, expression='[0..9]+'), SEMICOLON], expression='AMP HASH [0..9]+ SEMICOLON', name='numbered_entity')(toolset['substitute_numbered_entity'])
-    named_entity = Sequence([AMP, Repetition(Klass('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', expression='[a..zA..Z]'), numMin=1, numMax=False, expression='[a..zA..Z]+'), SEMICOLON], expression='AMP [a..zA..Z]+ SEMICOLON', name='named_entity')(toolset['substitute_named_entity'])
+    numbered_entity = Sequence([AMP, HASH, Repetition(Klass(u'0123456789', expression='[0..9]'), numMin=1, numMax=False, expression='[0..9]+'), SEMICOLON], expression='AMP HASH [0..9]+ SEMICOLON', name='numbered_entity')(toolset['substitute_numbered_entity'])
+    named_entity = Sequence([AMP, Repetition(Klass(u'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', expression='[a..zA..Z]'), numMin=1, numMax=False, expression='[a..zA..Z]+'), SEMICOLON], expression='AMP [a..zA..Z]+ SEMICOLON', name='named_entity')(toolset['substitute_named_entity'])
     entity = Choice([named_entity, numbered_entity], expression='named_entity / numbered_entity', name='entity')
         
     # wildcard in templates

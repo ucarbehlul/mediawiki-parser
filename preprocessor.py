@@ -79,15 +79,17 @@ def substitute_template(node):
     
 def substitute_template_wildcard(node, parameters):
     low = 1
-    high = len(parameters)
+    high = len(parameters)+1
     value = ""
     if node.value[0].value != ':':
        low = int(node.value[0].value)
+       if low < 0:
+           low = len(parameters) + 1 + low
     if len(node.value) > 2:
        high = int(node.value[2].value)
        if high < 0:
-           high = len(parameters) + high 
-    for num in range(low, high+1):
+           high = len(parameters) + 1 + high 
+    for num in range(low, high):
         try:
             value += " [[%s]]" % parameters[str(num)]
         except KeyError as e:
